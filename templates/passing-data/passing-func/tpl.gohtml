@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Hello world</title>
+    </head>
+    <body>
+        <ul>
+            {{ range . }}
+            <li>{{ uc .Name }} - {{ .Motto }}</li>
+            {{end}}
+        </ul>
+
+        <ul>
+            {{ range . }}
+            <li>{{ ft .Name }}</li>
+            {{end}}
+        </ul>
+
+    </body>
+</html>

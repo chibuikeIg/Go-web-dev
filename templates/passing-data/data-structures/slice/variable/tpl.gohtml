@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Document</title>
+    </head>
+    <body>
+        <ul>
+            {{ range $index, $element := . }}
+            <li>{{$index}} - {{ $element }}</li>
+            {{end}}
+        </ul>
+        {{ $sages := . }}
+        <p>first INDEX on the sages variable {{ index $sages 2 }}</p>
+    </body>
+</html>
