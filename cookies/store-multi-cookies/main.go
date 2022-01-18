@@ -27,46 +27,50 @@ func set(w http.ResponseWriter, r *http.Request) {
 
 func read(w http.ResponseWriter, r *http.Request) {
 
-	c1, err := r.Cookie("mycookie")
+	CookieKeys := []string{"General", "MyCookie"}
 
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		fmt.Fprintln(w, "YOUR COOKIE #1:", c1)
-	}
+	readAllCookie(w, r, CookieKeys)
 
-	c2, err := r.Cookie("general")
-
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		fmt.Fprintln(w, "YOUR COOKIE #2:", c2)
-	}
-
-	c3, err := r.Cookie("secret")
-
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		fmt.Fprintln(w, "YOUR COOKIE #3:", c3)
-	}
 }
 
 func abundant(w http.ResponseWriter, r *http.Request) {
-	http.SetCookie(w, &http.Cookie{
-		Name:  "general",
-		Value: "general's cookie",
-	})
 
-	http.SetCookie(w, &http.Cookie{
-		Name:  "secret",
-		Value: "secret cookie",
-	})
+	cookie1 := Cookie{Name: "General", Value: "General Value"}
+	cookie2 := Cookie{Name: "MyCookie", Value: "My Cookie Value"}
 
-	http.SetCookie(w, &http.Cookie{
-		Name:  "mycookie",
-		Value: "my cookie",
-	})
+	setMultiCookie(w, []Cookie{cookie1, cookie2})
 
 	fmt.Fprintln(w, "Your Cookies has been set")
+}
+
+func setMultiCookie(w http.ResponseWriter, cookies []Cookie) {
+
+	for _, element := range cookies {
+
+		http.SetCookie(w, &http.Cookie{
+			Name:  element.Name,
+			Value: element.Value,
+		})
+	}
+
+	return
+}
+
+type Cookie struct {
+	Name  string
+	Value string
+}
+
+func readAllCookie(w http.ResponseWriter, r *http.Request, CookieKeys []string) {
+
+	for _, element := range CookieKeys {
+
+		c, err := r.Cookie(element)
+
+		if err != nil {
+			fmt.Println(err)
+		} else {
+			fmt.Fprintln(w, "YOUR COOKIE:", c)
+		}
+	}
 }
