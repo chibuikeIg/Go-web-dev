@@ -20,7 +20,7 @@ func index(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 
-		id := exPackage.NewV4()
+		id, _ := exPackage.NewV4()
 
 		cookie = &http.Cookie{
 			Name:  "session",
