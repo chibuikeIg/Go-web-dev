@@ -37,7 +37,7 @@ func foo(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 
-		sID := uuid.NewV4()
+		sID, _ := uuid.NewV4()
 		c = &http.Cookie{
 			Name:  "session",
 			Value: sID.String(),
