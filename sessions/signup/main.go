@@ -5,12 +5,13 @@ import (
 	"text/template"
 
 	uuid "github.com/satori/go.uuid"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type User struct {
 	Username  string
 	Firstname string
-	Password  string
+	Password  []byte
 	Lastname  string
 }
 
@@ -88,7 +89,13 @@ func signup(w http.ResponseWriter, r *http.Request) {
 
 		// store users
 
-		DBUsers[un] = User{un, fname, pwd, lname}
+		bs, err := bcrypt.GenerateFromPassword([]byte(pwd), bcrypt.MinCost)
+
+		if err != nil {
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+		}
+
+		DBUsers[un] = User{un, fname, bs, lname}
 
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
