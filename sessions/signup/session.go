@@ -6,12 +6,12 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
-func getUser(w http.ResponseWriter, r *http.Request) User {
+func GetUser(w http.ResponseWriter, r *http.Request) User {
 
 	c, err := r.Cookie("session")
 
 	if err != nil {
-		sID, _ := uuid.NewV4()
+		sID := uuid.NewV4()
 
 		c = &http.Cookie{
 			Name:  "session",
@@ -32,7 +32,7 @@ func getUser(w http.ResponseWriter, r *http.Request) User {
 	return u
 }
 
-func alreadyLoggedIn(r *http.Request) bool {
+func AlreadyLoggedIn(r *http.Request) bool {
 	c, err := r.Cookie("session")
 
 	if err != nil {
