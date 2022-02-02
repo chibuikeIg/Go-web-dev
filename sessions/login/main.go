@@ -32,6 +32,7 @@ func main() {
 	http.HandleFunc("/bar", bar)
 	http.HandleFunc("/signup", signup)
 	http.HandleFunc("/login", login)
+	http.HandleFunc("/logout", logout)
 	http.Handle("/favicon.ico", http.NotFoundHandler())
 
 	http.ListenAndServe(":8080", nil)
@@ -155,4 +156,32 @@ func login(w http.ResponseWriter, r *http.Request) {
 
 	tpl.ExecuteTemplate(w, "login.html", nil)
 
+}
+
+func logout(w http.ResponseWriter, r *http.Request) {
+
+	if !AlreadyLoggedIn(r) {
+
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
+	// get cookie
+	c, _ := r.Cookie("session")
+
+	// delete session
+
+	delete(DBSessions, c.Value)
+
+	c = &http.Cookie{
+		Name:   "session",
+		Value:  "",
+		MaxAge: -1,
+	}
+
+	http.SetCookie(w, c)
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+
+	return
 }
