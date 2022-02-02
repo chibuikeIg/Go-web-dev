@@ -13,6 +13,7 @@ type User struct {
 	Firstname string
 	Password  []byte
 	Lastname  string
+	Type      string
 }
 
 var DBUsers = map[string]User{}
@@ -23,7 +24,7 @@ var tpl *template.Template
 func init() {
 	tpl = template.Must(template.ParseGlob("template/*"))
 	bs, _ := bcrypt.GenerateFromPassword([]byte("password"), bcrypt.MinCost)
-	DBUsers["test@user.com"] = User{"test@user.com", "test", bs, "user"}
+	DBUsers["test@user.com"] = User{"test@user.com", "test", bs, "user", "client"}
 }
 
 func main() {
@@ -55,6 +56,11 @@ func bar(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if u.Type != "admin" {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
 	tpl.ExecuteTemplate(w, "bar.html", u)
 }
 
@@ -72,6 +78,7 @@ func signup(w http.ResponseWriter, r *http.Request) {
 		pwd := r.FormValue("password")
 		fname := r.FormValue("fname")
 		lname := r.FormValue("lname")
+		t := r.FormValue("type")
 
 		if _, ok := DBUsers[un]; ok {
 
@@ -99,7 +106,7 @@ func signup(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
 		}
 
-		DBUsers[un] = User{un, fname, bs, lname}
+		DBUsers[un] = User{un, fname, bs, lname, t}
 
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
