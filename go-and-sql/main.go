@@ -27,6 +27,7 @@ func main() {
 	http.HandleFunc("/", Index)
 	http.HandleFunc("/names", Names)
 	http.HandleFunc("/create", CreateDBTable)
+	http.HandleFunc("/insert", Insert)
 
 	http.Handle("/favicon.ico", http.NotFoundHandler())
 
@@ -78,6 +79,21 @@ func CreateDBTable(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Fprintln(w, "Tables Created: ", n)
 
+}
+
+func Insert(w http.ResponseWriter, r *http.Request) {
+	stmt, err := db.Prepare(`INSERT INTO customers (name) VALUES ("John")`)
+	check(err)
+
+	defer stmt.Close()
+
+	result, err := stmt.Exec()
+	check(err)
+
+	n, err := result.RowsAffected()
+	check(err)
+
+	fmt.Fprintln(w, "Records Created: ", n)
 }
 
 func check(err error) {
