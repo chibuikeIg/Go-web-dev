@@ -30,6 +30,8 @@ func main() {
 	http.HandleFunc("/insert", Insert)
 	http.HandleFunc("/read", Read)
 	http.HandleFunc("/update", Update)
+	http.HandleFunc("/delete", Delete)
+	http.HandleFunc("/drop", DropTable)
 
 	http.Handle("/favicon.ico", http.NotFoundHandler())
 
@@ -128,6 +130,40 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	check(err)
 
 	fmt.Fprintln(w, "Records Updated: ", n)
+
+}
+
+func Delete(w http.ResponseWriter, r *http.Request) {
+
+	stmt, err := db.Prepare(`DELETE FROM customers WHERE name="James"`)
+	check(err)
+
+	defer stmt.Close()
+
+	result, err := stmt.Exec()
+	check(err)
+
+	n, err := result.RowsAffected()
+	check(err)
+
+	fmt.Fprintln(w, "Records Deleted: ", n)
+
+}
+
+func DropTable(w http.ResponseWriter, r *http.Request) {
+
+	stmt, err := db.Prepare(`DROP TABLE customers`)
+	check(err)
+
+	defer stmt.Close()
+
+	result, err := stmt.Exec()
+	check(err)
+
+	n, err := result.RowsAffected()
+	check(err)
+
+	fmt.Fprintln(w, "TABLES DROPPED: ", n)
 
 }
 
