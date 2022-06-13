@@ -28,6 +28,8 @@ func main() {
 	http.HandleFunc("/names", Names)
 	http.HandleFunc("/create", CreateDBTable)
 	http.HandleFunc("/insert", Insert)
+	http.HandleFunc("/read", Read)
+	http.HandleFunc("/update", Update)
 
 	http.Handle("/favicon.ico", http.NotFoundHandler())
 
@@ -94,6 +96,39 @@ func Insert(w http.ResponseWriter, r *http.Request) {
 	check(err)
 
 	fmt.Fprintln(w, "Records Created: ", n)
+}
+
+func Read(w http.ResponseWriter, r *http.Request) {
+
+	rows, err := db.Query(`SELECT name FROM customers`)
+	check(err)
+
+	defer rows.Close()
+	var name string
+
+	for rows.Next() {
+
+		err = rows.Scan(&name)
+
+		fmt.Fprintln(w, "RETRIEVED RECORDS:", name)
+	}
+}
+
+func Update(w http.ResponseWriter, r *http.Request) {
+
+	stmt, err := db.Prepare(`UPDATE customers SET name="James" WHERE name="John"`)
+	check(err)
+
+	defer stmt.Close()
+
+	result, err := stmt.Exec()
+	check(err)
+
+	n, err := result.RowsAffected()
+	check(err)
+
+	fmt.Fprintln(w, "Records Updated: ", n)
+
 }
 
 func check(err error) {
