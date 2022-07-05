@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        let statusCodes = [
+            {"Code":200, "Descrip":"StatusOk"},
+            {"Code":301, "Descrip":"StatusMovedPermanently"},
+            {"Code":302, "Descrip":"StatusFound"},
+            {"Code":303, "Descrip":"StatusSeeOther"},
+            {"Code":307, "Descrip":"StatusTemporaryRedirect"},
+            {"Code":400, "Descrip":"StatusBadRequest"},
+            {"Code":401, "Descrip":"StatusUnauthorized"},
+            {"Code":402, "Descrip":"StatusPaymentRequired"},
+            {"Code":403, "Descrip":"StatusForbidden"},
+            {"Code":404, "Descrip":"StatusNotFound"},
+            {"Code":405, "Descrip":"StatusMethodNotAllowed"},
+            {"Code":418, "Descrip":"StatusTeapot"},
+            {"Code":500, "Descrip":"StatusInternalServerError"}
+        ]
+
+        statusCodes = JSON.stringify(statusCodes)
+
+        document.write(statusCodes)
+
+    </script>
+</body>
+</html>
