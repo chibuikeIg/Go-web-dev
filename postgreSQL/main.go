@@ -40,6 +40,7 @@ func main() {
 	defer db.Close()
 
 	http.HandleFunc("/books", books)
+	http.HandleFunc("/books/show", bookShow)
 
 	http.ListenAndServe(":8080", nil)
 
@@ -55,7 +56,6 @@ func books(w http.ResponseWriter, r *http.Request) {
 	rows, err := db.Query("SELECT * FROM books")
 
 	if err != nil {
-		panic(err)
 		http.Error(w, http.StatusText(500), 500)
 		return
 	}
@@ -71,7 +71,6 @@ func books(w http.ResponseWriter, r *http.Request) {
 		err = rows.Scan(&book.isbn, &book.title, &book.author, &book.price)
 
 		if err != nil {
-			panic(err)
 			http.Error(w, http.StatusText(500), 500)
 			return
 		}
@@ -80,7 +79,6 @@ func books(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err = rows.Err(); err != nil {
-		panic(err)
 		http.Error(w, http.StatusText(500), 500)
 		return
 	}
@@ -88,5 +86,37 @@ func books(w http.ResponseWriter, r *http.Request) {
 	for _, book := range books {
 		fmt.Fprintf(w, "%s, %s, %s, $%.2f\n", book.isbn, book.title, book.author, book.price)
 	}
+
+}
+
+func bookShow(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method != http.MethodGet {
+		http.Error(w, http.StatusText(405), 405)
+		return
+	}
+
+	isbn := r.FormValue("isbn")
+
+	if isbn == "" {
+		http.Error(w, http.StatusText(400), http.StatusBadRequest)
+		return
+	}
+
+	row := db.QueryRow("SELECT * FROM books WHERE isbn=$1", isbn)
+
+	book := Book{}
+
+	err := row.Scan(&book.isbn, &book.title, &book.author, &book.price)
+
+	if err == sql.ErrNoRows {
+		http.NotFound(w, r)
+		return
+	} else if err != nil {
+		http.Error(w, http.StatusText(500), http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Fprintf(w, "%s, %s, %s, $%.2f\n", book.isbn, book.title, book.author, book.price)
 
 }
