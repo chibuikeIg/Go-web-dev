@@ -50,6 +50,10 @@ func main() {
 	http.HandleFunc("/books/create", createBook)
 	http.HandleFunc("/books/store", storeBook)
 
+	http.HandleFunc("/books/update", updateBook)
+
+	http.HandleFunc("/books/update/process", updateBookProcess)
+
 	http.ListenAndServe(":8080", nil)
 
 }
@@ -164,6 +168,78 @@ func storeBook(w http.ResponseWriter, r *http.Request) {
 	book.Price = float32(f64)
 
 	_, err = db.Exec("INSERT INTO books (isbn, title, author, price) VALUES ($1, $2, $3, $4)", book.Isbn, book.Title, book.Author, book.Price)
+
+	if err != nil {
+		http.Error(w, http.StatusText(500), http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, "/books", http.StatusSeeOther)
+	return
+
+}
+
+func updateBook(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method != http.MethodGet {
+		http.Error(w, http.StatusText(405), 405)
+		return
+	}
+
+	isbn := r.FormValue("isbn")
+
+	if isbn == "" {
+		http.Error(w, http.StatusText(400), http.StatusBadRequest)
+		return
+	}
+
+	row := db.QueryRow("SELECT * FROM books WHERE isbn=$1", isbn)
+
+	book := Book{}
+
+	err := row.Scan(&book.Isbn, &book.Title, &book.Author, &book.Price)
+
+	if err == sql.ErrNoRows {
+		http.NotFound(w, r)
+		return
+	} else if err != nil {
+		http.Error(w, http.StatusText(500), http.StatusInternalServerError)
+		return
+	}
+
+	tpl.ExecuteTemplate(w, "update.html", book)
+
+}
+
+func updateBookProcess(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method != http.MethodPost {
+		http.Error(w, http.StatusText(405), 405)
+		return
+	}
+
+	book := Book{}
+
+	book.Isbn = r.FormValue("isbn")
+	book.Title = r.FormValue("title")
+	book.Author = r.FormValue("author")
+	price := r.FormValue("price")
+
+	if book.Isbn == "" || book.Title == "" || book.Author == "" || price == "" {
+		http.Error(w, http.StatusText(400), http.StatusBadRequest)
+		return
+	}
+
+	f64, err := strconv.ParseFloat(price, 32)
+
+	if err != nil {
+		http.Error(w, http.StatusText(406)+" Please go back and enter a valid amount", http.StatusNotAcceptable)
+		return
+	}
+
+	book.Price = float32(f64)
+
+	_, err = db.Exec("UPDATE books SET title=$2, author=$3, price=$4 WHERE isbn=$1", book.Isbn, book.Title, book.Author, book.Price)
 
 	if err != nil {
 		http.Error(w, http.StatusText(500), http.StatusInternalServerError)
