@@ -46,13 +46,11 @@ func main() {
 
 	http.HandleFunc("/books", books)
 	http.HandleFunc("/books/show", bookShow)
-
 	http.HandleFunc("/books/create", createBook)
 	http.HandleFunc("/books/store", storeBook)
-
 	http.HandleFunc("/books/update", updateBook)
-
 	http.HandleFunc("/books/update/process", updateBookProcess)
+	http.HandleFunc("/books/delete", deleteBook)
 
 	http.ListenAndServe(":8080", nil)
 
@@ -240,6 +238,34 @@ func updateBookProcess(w http.ResponseWriter, r *http.Request) {
 	book.Price = float32(f64)
 
 	_, err = db.Exec("UPDATE books SET title=$2, author=$3, price=$4 WHERE isbn=$1", book.Isbn, book.Title, book.Author, book.Price)
+
+	if err != nil {
+		http.Error(w, http.StatusText(500), http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, "/books", http.StatusSeeOther)
+	return
+
+}
+
+func deleteBook(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method != http.MethodGet {
+		http.Error(w, http.StatusText(405), 405)
+		return
+	}
+
+	book := Book{}
+
+	book.Isbn = r.FormValue("isbn")
+
+	if book.Isbn == "" {
+		http.Error(w, http.StatusText(400), http.StatusBadRequest)
+		return
+	}
+
+	_, err := db.Exec("DELETE FROM books WHERE isbn=$1", book.Isbn)
 
 	if err != nil {
 		http.Error(w, http.StatusText(500), http.StatusInternalServerError)
